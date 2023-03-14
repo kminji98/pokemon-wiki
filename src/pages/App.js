@@ -1,11 +1,21 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Header from '../components/Header'
+import { createGlobalStyle } from 'styled-components'
+import Header from '../components/atom/Header'
 import Main from './Main';
 import NotFound from './NotFound';
+
+const GlobalStyle = createGlobalStyle`
+	:root {
+		--primary: #FFCC00;
+    --black: #222222;
+		--navy: #0A285F;
+	}
+`
 
 function App() {
   return (
     <div className="App">
+			<GlobalStyle />
       <BrowserRouter>
 				<Header />
 				<Routes>
