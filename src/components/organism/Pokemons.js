@@ -1,19 +1,19 @@
 import styled from "styled-components";
 
-const Pokemons = ({pokemons = []}) => {
-  const getPokemonNo = (url) => {
+const Pokemons = ({pokemons = [], onPokemonNameClick}) => {
+  const getPokemonIdx = (url) => {
     let urlToArr = url.split("/");
     return urlToArr[urlToArr.length - 2];
   }
 
   return (
     <Cards>
-      {pokemons?.map((pokemon) => {
+      {pokemons && pokemons?.map((pokemon) => {
         const name = pokemon.name;
-        const no = getPokemonNo(pokemon.url);
+        const id = getPokemonIdx(pokemon.url);
         return(
           <Card>
-            <Title>[{no}] {name}</Title>
+            <Title onClick={() => onPokemonNameClick(id)} >{id}. {name}</Title>
           </Card>
         )
       })}
@@ -28,18 +28,18 @@ const Cards = styled.div`
 const Card = styled.div`
   flex: 1;
 
-  &: hover {
-    cursor: pointer;
-  }
 `
-
+  
 const Title = styled.h3`
   margin-bottom: 24px;
-  font-size: 12px;
+  font-size: 16px;
   color: var(--black);
-
+  font-weight: 500;
+  
   &: hover {
+    cursor: pointer;
     color: var(--primary);
+    font-weight: bold;
   }
 `
 
