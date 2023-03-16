@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { toJS } from 'mobx';
 import styled from 'styled-components';
+import { useEffect, useRef, useState } from 'react';
+import { useObserver } from 'mobx-react-lite'
+import { useSearchParams, useLocation } from 'react-router-dom'
+
 import useStore from '../store/useStore';
+
 import Pokemons from '../components/organism/Pokemons'
 import SelectedPokemon from '../components/organism/SelectedPokemon'
-import { useObserver } from 'mobx-react-lite'
+import Header from '../components/atom/Header';
+
+
 
 const Main = () => {
   const { pokemon } = useStore();
@@ -12,14 +19,29 @@ const Main = () => {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [selectedCardLoading, setSelectedCardLoading] = useState(false);
-  
+  const [notFoundPokemonId, setNotFoundPokemonId] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const id = searchParams.get('id');
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const initSelectedPokemon = () => {
+      if(id && id !== 'null') {
+        onPokemonNameClick(id)};
+    }
+
+    initSelectedPokemon();
+  }, [pathname])
+
   useEffect(() => {
     setLoading(true);
-    
     if(!loading) return;
     
     const callPokemons = async () => {
-      await pokemon.callPokemonsByIdx(() => { setLoading(false); });
+      await pokemon.callPokemonsByIdx(() => { 
+        setLoading(false);
+      });
     };
 
     callPokemons();
@@ -46,38 +68,58 @@ const Main = () => {
   }, [loading]);
 
 
-  const onPokemonNameClick = async(pokeIdx) => {
+  const onPokemonNameClick = async(pokeId) => {
     await setSelectedCardLoading(true);
-    await pokemon.callPokemon(pokeIdx);
-    await setSelectedCardLoading(false);
+
+    await pokemon.callPokemon(pokeId, () => {
+
+      setNotFoundPokemonId('');
+      setSelectedCardLoading(false);
+      setSearchParams({ id: pokeId });
+
+
+    }, (errCode) => {
+
+      if(errCode === 404) setNotFoundPokemonId(pokeId);
+      setSelectedCardLoading(false);
+
+    });
   }
 
   
   return useObserver(() => (
-    <MainWrap>
-      <ListWrap>
-        <Pokemons pokemons={pokemon.pokemons} onPokemonNameClick={onPokemonNameClick} />
-        {loading && <Loading> Loading ... </Loading>}
-        <Bottom ref={bottomRef} />
-      </ListWrap>
-      {selectedCardLoading && 
-        <CardLoadingWrap>
-          <CardLoading>Loading...</CardLoading>
-        </CardLoadingWrap> 
-      }
-      {!selectedCardLoading && pokemon.selected && pokemon.selected.id && 
-        <SelectedPokemon pokemon={pokemon.selected} evolution={pokemon.selectedEvolution} /> }
-    </MainWrap>
+    <>
+      <Header onSearch={onPokemonNameClick} />
+      <MainWrap>
+        {!selectedCardLoading && pokemon.selected && 
+          <SelectedPokemon pokemon={pokemon.selected} bases={toJS(pokemon.bases)} nexts={pokemon.nexts} notFoundPokemonId={notFoundPokemonId} onPokemonNameClick={onPokemonNameClick} /> }
+
+        <ListWrap>
+          <Pokemons pokemons={pokemon.pokemons} onPokemonNameClick={onPokemonNameClick} />
+          {loading && <Loading> Loading ... </Loading>}
+          <Bottom ref={bottomRef} />
+        </ListWrap>
+
+        {selectedCardLoading && 
+          <CardLoadingWrap>
+            <CardLoading>Loading...</CardLoading>
+          </CardLoadingWrap> 
+        }
+      </MainWrap>
+    </>
   ));
 }
 const MainWrap = styled.div`
   display: flex;
+  padding-top: 60px;
   
+  @media (max-width: 767px) {
+    flex-direction: column;
+  }
 `
 
 const ListWrap = styled.div`
   flex: 1;
-  border-right: 1px solid var(--gray);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -105,6 +147,10 @@ const CardLoading = styled.div`
   padding: 100px;
   font-size: 20px;
   color: var(--gray);
+
+  top: 100px; 
+  right: 40%;
+  position: fixed;
 `
 
 

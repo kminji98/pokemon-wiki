@@ -7,7 +7,10 @@ export function getPokemonsByIdx (params) {
     method: 'get',
     url: '/pokemon',
     baseURL: baseUrl,
-    params
+    params,
+    headers: {
+      'cache-control': 'public'
+    }
   })
 }
 
@@ -15,17 +18,22 @@ export function getPokemon (pokeIdx) {
   return axios ({
     method: 'get',
     url: `/pokemon/${pokeIdx}`,
-    baseURL: baseUrl
+    baseURL: baseUrl,
+    headers: {
+      'cache-control': 'public'
+    }
   })
 }
 
 
 export function getPokemonEvolutionChain (chainIdx) {
-  console.log('chainIdx', chainIdx);
   return axios ({
     method: 'get',
     url: `/evolution-chain/${chainIdx}`,
-    baseURL: baseUrl
+    baseURL: baseUrl,
+    headers: {
+      'cache-control': 'public'
+    }
   })
 }
 
@@ -33,7 +41,10 @@ export function getPokemonSpecies (pokeIdx) {
   return axios ({
     method: 'get',
     url: `/pokemon-species/${pokeIdx}`,
-    baseURL: baseUrl
+    baseURL: baseUrl,
+    headers: {
+      'cache-control': 'public'
+    }
   })
 }
 

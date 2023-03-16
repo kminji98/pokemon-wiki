@@ -9,7 +9,7 @@ import {
 
 
 
-const callPokemon = async (pokeIdx) => {
+const callPokemon = async (pokeIdx, callback, errCallback) => {
   try {
     const res = await getPokemon(pokeIdx);
     const evolutionRes = await getPokemonSpecies(res.data.name);
@@ -17,24 +17,34 @@ const callPokemon = async (pokeIdx) => {
     
     pokemon.selected = res.data;
     pokemon.selectedSpecies = evolutionRes.data;
-    pokemon.selected['koreanName'] = evolutionRes.data && evolutionRes.data.names.length > 0 ? evolutionRes.data.names[2].name : '';
 
 
     let chainArr = evolutionRes.data.evolution_chain.url.split("/");
     const chainIdx = chainArr[chainArr.length-2]
 
     await callPokemonEvolutionChain(chainIdx);
+    callback();
 
     return(res.data);
   } catch (error) {
-    console.log('error', error);
+
+    initializeSelectedPokemon();
+    errCallback(404);
+
   }
+}
+
+const initializeSelectedPokemon = () => {
+  pokemon.selected = {};
+  pokemon.selectedSpecies = {};
+  pokemon.bases = [];
+  pokemon.nexts = [];
 }
 
 
 const callPokemonEvolutionChain = async (chainIdx) => {
   const evolutionRes = await getPokemonEvolutionChain(chainIdx);
-  setChain(evolutionRes.data.chain);  
+  setChain(evolutionRes.data.chain);
 }
 
 const getIdFromUrl = (url) => {
@@ -64,7 +74,9 @@ const setChain = (speciesObj) => {
   
   // 1
   if(!speciesObj.hasOwnProperty('evolves_to')) return;
+
   const next = speciesObj['evolves_to'][0] || '';
+  
   if(next) {
     const id = getIdFromUrl(next.species.url);
     
@@ -77,11 +89,12 @@ const setChain = (speciesObj) => {
   
   // 2
   if(!next.hasOwnProperty('evolves_to')) return;
+  
   const last = next['evolves_to'][0] || '';
+  
   if(last) {
     const id = getIdFromUrl(last.species.url);
     
-
     const lastSpecies = {
       name: last.species.name,
       id: id
@@ -90,7 +103,37 @@ const setChain = (speciesObj) => {
   };
 
   const matchIdx = chain.findIndex(ele => ele.name === pokemon.selected.name);
-  console.log('matchIdx', matchIdx);
+  
+  let bases = [];
+  let nexts = [];
+
+  switch( matchIdx ){
+    case 0:
+
+      if(chain[1]) nexts.push(chain[1]);
+      if(chain[2]) nexts.push(chain[2]);
+      break;
+
+    case 1:
+      
+      if(chain[0]) bases.push(chain[0]);
+      if(chain[2]) nexts.push(chain[2]);
+      break;
+
+    case 2:
+      if(chain[0]) bases.push(chain[0]);
+      if(chain[1]) bases.push(chain[1]);
+      break;
+
+    default:
+      break;
+  }
+
+
+  pokemon.bases = bases;
+  pokemon.nexts = nexts;
+
+  return;
 }
 
 
@@ -129,6 +172,8 @@ const pokemon = observable({
   selectedSpecies: {},
   selectedEvolution: {},
   pokemons: [],
+  bases: [],
+  nexts: [],
   offset: 0,
   limit: 20,
   count: 0,

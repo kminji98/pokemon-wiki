@@ -12,8 +12,9 @@ const Pokemons = ({pokemons = [], onPokemonNameClick}) => {
         const name = pokemon.name;
         const id = getPokemonIdx(pokemon.url);
         return(
-          <Card>
+          <Card key={`${id}_${name}`}>
             <Title onClick={() => onPokemonNameClick(id)} >{id}. {name}</Title>
+            <Empty />
           </Card>
         )
       })}
@@ -27,11 +28,10 @@ const Cards = styled.div`
 `
 const Card = styled.div`
   flex: 1;
-
+  display: flex;
 `
   
 const Title = styled.h3`
-  margin-bottom: 24px;
   font-size: 16px;
   color: var(--black);
   font-weight: 500;
@@ -41,6 +41,10 @@ const Title = styled.h3`
     color: var(--primary);
     font-weight: bold;
   }
+`
+
+const Empty = styled.div`
+  flex: 1;
 `
 
 export default Pokemons;
