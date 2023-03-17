@@ -24,7 +24,7 @@ const SelectedPokemon = ({pokemon = {}, bases = [], nexts = [], notFoundPokemonI
                 return (
                     <LinkWrap key={`${base.id}_${baseName}`} >
                       <Link onClick={() => onPokemonNameClick(base.id)}>{base.id}. { baseName }</Link>
-                      {bases.length-1 !== i && <Arrow> > </Arrow>}
+                      {bases.length-1 !== i && <Arrow> {'>'} </Arrow>}
                     </LinkWrap>
                   )}) 
               }
@@ -41,7 +41,7 @@ const SelectedPokemon = ({pokemon = {}, bases = [], nexts = [], notFoundPokemonI
                 return (
                     <LinkWrap key={`${next.id}_${nextName}`} >
                       <Link onClick={() => onPokemonNameClick(next.id)}>{ next.id }. { nextName }</Link>
-                      {nexts.length-1 !== i && <Arrow> > </Arrow>}
+                      {nexts.length-1 !== i && <Arrow> {'>'} </Arrow>}
                     </LinkWrap>
                   )}) 
               }
@@ -57,7 +57,7 @@ const SelectedPokemon = ({pokemon = {}, bases = [], nexts = [], notFoundPokemonI
 const Wrap = styled.div`
   flex: 3;
   padding-left: 50px;
-  top: 100px; 
+  top: 23%;
   right: 30%;
   position: fixed;
 
